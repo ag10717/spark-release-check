@@ -4,3 +4,15 @@ name: Deploy to DEV
 on:
   workflow_call:
   workflow_dispatch:
+
+permissions:
+  contents: write
+  id-token: write # Required for the azure login action
+  checks: write # Required for test-reporter action
+
+jobs:
+  echo-hello:
+    runs-on: ubuntu-latest
+    steps:
+      - run: |
+          echo "Hello, DEV"

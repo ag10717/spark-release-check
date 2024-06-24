@@ -11,7 +11,8 @@ permissions:
   checks: write # Required for test-reporter action
 
 jobs:
-  build:
-    # Run the build items that you may have
-  test:
-    # Run tests associated with the build
+  echo-everything:
+    runs-on: ubuntu-latest
+    steps:
+      - runs: |
+          echo "Hello, EVERYTHING"
