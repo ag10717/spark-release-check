@@ -1,0 +1,17 @@
+name: Build & Test
+
+# Can run on pushes and manually triggered
+on:
+  push:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  id-token: write # Required for the azure login action
+  checks: write # Required for test-reporter action
+
+jobs:
+  build:
+    # Run the build items that you may have
+  test:
+    # Run tests associated with the build
