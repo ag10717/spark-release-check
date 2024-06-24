@@ -1,6 +1,6 @@
 name: Build & Test
 run-name: Build & Test
-# Can run on pushes and manually triggered
+# Can run on pushes and manually triggerey
 on:
   push:
   workflow_dispatch:
@@ -14,5 +14,5 @@ jobs:
   echo-everything:
     runs-on: ubuntu-latest
     steps:
-      - runs: |
+      - run: |
           echo "Hello, EVERYTHING"
