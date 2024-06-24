@@ -1,5 +1,5 @@
 name: Build & Test
-
+run-name: Build & Test
 # Can run on pushes and manually triggered
 on:
   push:
