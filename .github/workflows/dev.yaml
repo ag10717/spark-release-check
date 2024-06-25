@@ -3,9 +3,10 @@ name: Deploy to DEV
 # Can run from other workflows or manually triggered
 on:
   workflow_run:
-    workflows: ["Build & Test"]
+    workflows: 
+      - "Build & Test"
     types:
-      - completed
+      - complete
   workflow_dispatch:
 
 permissions:
@@ -15,6 +16,7 @@ permissions:
 
 jobs:
   echo-hello:
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
     runs-on: ubuntu-latest
     steps:
       - run: |
