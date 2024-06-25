@@ -19,5 +19,18 @@ jobs:
     if: ${{ github.event.workflow_run.conclusion == 'success' }}
     runs-on: ubuntu-latest
     steps:
-      - run: |
+      - name: Checkout Codebase
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: "ECHO"
+        run: |
           echo "Hello, DEV"
+
+      - name: "READ FILE"
+        run: |
+          while IFS= read -r line; do
+            echo "LINE: $line"
+          done < src/changing.md
+
