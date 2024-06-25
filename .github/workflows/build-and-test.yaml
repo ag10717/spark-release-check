@@ -25,5 +25,5 @@ jobs:
           echo "Hello, EVERYTHING"
 
       - name: "TAG"
-        uses: ag10717/spark-release-tag@v1
+        uses: ag10717/spark-release-tag@v2
 
