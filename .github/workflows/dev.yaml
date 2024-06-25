@@ -27,9 +27,12 @@ jobs:
         run: |
           echo "Hello, DEV"
 
-      - name: "READ FILE"
-        run: |
-          while IFS= read -r line; do
-            echo "LINE: $line"
-          done < src/changing.md
+    read-file:
+      runs-on: ubuntu-latest
+      steps:
+        - name: "READ FILE"
+          run: |
+            while IFS= read -r line; do
+              echo "LINE: $line"
+            done < src/changing.md
 
