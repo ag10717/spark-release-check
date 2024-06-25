@@ -6,7 +6,7 @@ on:
     workflows: 
       - "Build & Test"
     types:
-      - complete
+      - completed
   workflow_dispatch:
 
 permissions:
