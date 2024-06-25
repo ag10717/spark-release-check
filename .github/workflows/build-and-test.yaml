@@ -15,6 +15,10 @@ jobs:
   echo-everything:
     runs-on: ubuntu-latest
     steps:
-      - run: |
+      - name: "ECHO"
+        run: |
           echo "Hello, EVERYTHING"
+
+      - name: "TAG"
+        uses: ag10717/spark-release-tag@v1
 
