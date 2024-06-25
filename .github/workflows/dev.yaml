@@ -27,6 +27,7 @@ jobs:
           echo "Hello, DEV"
   reading-file:
     runs-on: ubuntu-latest
+    needs: [echo-hello]
     steps:
       - name: "READ FILE"
         run: |
