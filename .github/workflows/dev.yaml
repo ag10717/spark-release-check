@@ -2,7 +2,10 @@ name: Deploy to DEV
 
 # Can run from other workflows or manually triggered
 on:
-  workflow_call:
+  workflow_run:
+    workflows: ["Build & Test"]
+    types:
+      - completed
   workflow_dispatch:
 
 permissions:
