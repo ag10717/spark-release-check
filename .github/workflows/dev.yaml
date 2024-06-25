@@ -22,17 +22,15 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
-
       - name: "ECHO"
         run: |
           echo "Hello, DEV"
-
-    read-file:
-      runs-on: ubuntu-latest
-      steps:
-        - name: "READ FILE"
-          run: |
-            while IFS= read -r line; do
-              echo "LINE: $line"
-            done < src/changing.md
+  reading-file:
+    runs-on: ubuntu-latest
+    steps:
+      - name: "READ FILE"
+        run: |
+          while IFS= read -r line; do
+            echo "LINE: $line"
+          done < src/changing.md
 
