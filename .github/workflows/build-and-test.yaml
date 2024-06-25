@@ -1,7 +1,7 @@
 name: Build & Test
 run-name: Build & Test
 #
-# Can run on pushes and manually triggerey
+# Can run on pushes and manually triggered
 on:
   push:
   workflow_dispatch:
@@ -15,6 +15,11 @@ jobs:
   echo-everything:
     runs-on: ubuntu-latest
     steps:
+      - name: Checkout Codebase
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
       - name: "ECHO"
         run: |
           echo "Hello, EVERYTHING"
