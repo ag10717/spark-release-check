@@ -92,8 +92,7 @@ jobs:
             if [[ $feature_version != *"v"* ]]; then
               echo "Bumping Feature Version"
               # already has a feature version and it can be bumped
-              trimmed=$(echo "${feature_version:1}")
-              new_feature_version=$((trimmed + 1))
+              new_feature_version=$(($feature_version + 1))
               # remove the existing feature version and append the new on
               no_feature_string=($(echo $latest_release | sed 's/-[0-9]*//'))
               new_version="$no_feature_string-$new_feature_version"
@@ -102,7 +101,7 @@ jobs:
               # doesn't have a feature version yet
               echo "Adding Feature Version & Bumping Patch"
               patch=$((patch + 1))
-              new_version="v${version_values[0]}.${version_values[1]}.$patch-001"
+              new_version="v${version_values[0]}.${version_values[1]}.$patch-1"
             fi
           fi
 
@@ -121,5 +120,5 @@ jobs:
           REF_NAME: ${{ github.ref_name }}
         run: |
           echo "Creating Release"
-          gh release create $RELEASE_VERSION --target $REF_NAME './deployment/deployment.zip'
+          gh release create $RELEASE_VERSION --target $REF_NAME --title $RELEASE_VERSION './deployment/deployment.zip'
 
