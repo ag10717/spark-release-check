@@ -48,39 +48,64 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      - name: Get Latest Release Version
+      - name: Get Release Version
         id: get-release-version
         env:
           GH_TOKEN: ${{ github.token }}
+          REF_NAME: ${{ github.ref_name }}
         run: |
           echo "Getting Latest Release Version"
           latest_release=$(gh release view --json tagName --jq ".tagName")
           echo "Latest Release: $latest_release"
 
-          # use the commit to check and see if something like MAJOR or MINOR is written in it
+          # use the PR title to check and see if something like MAJOR or MINOR is written in it
           # if it is then bump the version up in that column; ie: MAJOR; v1 -> v2.. MINOR; v1.1 -> v1.2
           # default with no message will be patch bump; ie: v1.1.1 -> v1.1.2
-          echo "Getting Latest Commit Message"
-          latest_commit=$(git log -1 --pretty=%B)
-          echo "Latest Commit Message: $latest_commit" 
 
-          version_values=($(echo $latest_release | sed 's/v//' | tr '.' ' '))
           new_version=""
-          if [[ $latest_commit == *"MAJOR"* ]]; then
-            # bump major version
-            echo "Bumping Major Version"
-            major=$((${version_values[0]} + 1))
-            new_version="v$major.${version_values[1]}.${version_values[2]}"
-          elif [[ $latest_commit == *"MINOR"* ]]; then
-            # bump minor version
-            echo "Bumping Minor Version"
-            minor=$((${version_values[1]} + 1))
-            new_version="v${version_values[0]}.$minor.${version_values[3]}"
+          version_values=($(echo $latest_release | sed 's/v//' | tr '.' ' '))
+
+          if [[ $REF_NAME == "main" ]]; then
+            echo "Getting Latest Commit Message"
+            latest_commit=$(git log -1 --pretty=%B)
+            echo "Latest Commit Message: $latest_commit" 
+
+            # remove -xxx from the patch now that the features have been merged into main
+            patch=($(echo $version_values[2] | sed 's/-[0-9]*//'))
+
+            if [[ $latest_commit == *"MAJOR"* ]]; then
+              # bump major version
+              echo "Bumping Major Version"
+              major=$((${version_values[0]} + 1))
+              new_version="v$major.${version_values[1]}.$patch"
+            elif [[ $latest_commit == *"MINOR"* ]]; then
+              # bump minor version
+              echo "Bumping Minor Version"
+              minor=$((${version_values[1]} + 1))
+              new_version="v${version_values[0]}.$minor.$patch"
+            else
+              # bump patch version
+              echo "Bumping Patch Version"
+              patch=$(($patch + 1))
+              new_version="v${version_values[0]}.${version_values[1]}.$patch"
+            fi
           else
-            # bump patch version
-            echo "Bumping Patch Version"
-            patch=$((${version_values[2]} + 1))
-            new_version="v${version_values[0]}.${version_values[1]}.$patch"
+            echo "Checking Feature Version"
+            feature_version=$(echo "${latest_release: -4}")
+            if [[ $feature_version == *"-"* ]]; then
+              echo "Bumping Feature Version"
+              # already has a feature version and it can be bumped
+              trimmed=$(echo "${feature_version:1}")
+              new_feature_version=$((trimmed + 1))
+              # remove the existing feature version and append the new on
+              no_feature_string=($(echo $latest_release | sed 's/-[0-9]*//'))
+              new_version="$no_feature_string-$new_feature_version"
+            else
+              # if it doesn't contain the "-" then it doesn't have a feature version on the end
+              # doesn't have a feature version yet
+              echo "Adding Feature Version"
+              new_version="$latest_release-001"
+            fi
           fi
 
           echo "New Version Number: $new_version"
