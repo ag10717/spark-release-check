@@ -65,7 +65,7 @@ jobs:
           new_version=""
           version_values=($(echo $latest_release | sed 's/v//' | tr '.' ' '))
           # trim off the feature version if it exists so we just have the patch version for later
-          patch=($(echo $version_values[2] | sed 's/-[0-9]*//'))
+          patch=($(echo ${version_values[2]} | sed 's/-[0-9]*//'))
 
           if [[ $REF_NAME == "main" ]]; then
             echo "Getting Latest Commit Message"
@@ -83,8 +83,6 @@ jobs:
               minor=$((${version_values[1]} + 1))
               new_version="v${version_values[0]}.$minor.$patch"
             else
-              # bump patch version
-              # just remove the feature version
               echo "Using Patch Version"
               new_version="v${version_values[0]}.${version_values[1]}.$patch"
             fi
