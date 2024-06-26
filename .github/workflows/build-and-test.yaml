@@ -58,5 +58,5 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           echo "Creating Release"
-          gh release create v1.0.0 './deployment/deployment.zip#GOLANG Lambda HelloWorld'
+          gh release create v1.0.0 './deployment/deployment.zip'
 
