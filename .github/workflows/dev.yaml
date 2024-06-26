@@ -27,6 +27,9 @@ jobs:
         env:
           REF_NAME: ${{ github.ref_name }}
           GH_TOKEN: ${{ github.token }}
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_DEFAULT_REGION: ap-southeast-2
         run: |
           echo "REF_NAME: $REF_NAME"
 
@@ -37,7 +40,3 @@ jobs:
           echo "Running Deployment"
           aws lambda update-function-code --function-name "helloworld-go" --zip-file "deployment.zip"
           echo "Completed Updating Function Code"
-        env:
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          AWS_DEFAULT_REGION: ap-southeast-2
