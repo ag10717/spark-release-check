@@ -1,9 +1,10 @@
 name: Deploy to DEV
+run-name: "DEV Deploy - Version: ${{ github.ref_name }}"
 
 # Can run from other workflows or manually triggered
 on:
   workflow_run:
-    workflows: 
+    workflows:
       - "Build & Test"
     types:
       - completed
@@ -16,6 +17,8 @@ permissions:
 
 jobs:
   deploy:
+    if: |
+      (github.event.workflow_run.conclusion == 'success' || github.event_name == "workflow_dispatch" )
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Codebase
