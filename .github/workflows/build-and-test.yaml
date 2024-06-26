@@ -12,7 +12,7 @@ permissions:
   checks: write # Required for test-reporter action
 
 jobs:
-  Build and Package:
+  build-and-package:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Codebase
@@ -40,10 +40,11 @@ jobs:
         with:
           name: deployment
           path: ./deployment.zip
-  Release:
+  release:
+    needs: build-and-package
     runs-on: ubuntu-latest
     steps:
-      - name: Download Build
+      - name: "Download Build"
         uses: actions/download-artifact@v4
         with:
           name: deployment
