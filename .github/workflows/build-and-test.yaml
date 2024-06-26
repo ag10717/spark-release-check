@@ -102,7 +102,7 @@ jobs:
               # doesn't have a feature version yet
               echo "Adding Feature Version & Bumping Patch"
               patch=$((patch + 1))
-              new_version="v${version_values[0]}.${version_values[1]}.$patch-001"
+              new_version="v${version_values[0]}.${version_values[1]}.$patch-1"
             fi
           fi
 
@@ -121,5 +121,5 @@ jobs:
           REF_NAME: ${{ github.ref_name }}
         run: |
           echo "Creating Release"
-          gh release create $RELEASE_VERSION --target $REF_NAME './deployment/deployment.zip'
+          gh release create $RELEASE_VERSION --target $REF_NAME --title $RELEASE_VERSION './deployment/deployment.zip'
 
