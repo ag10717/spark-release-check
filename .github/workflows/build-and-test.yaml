@@ -34,7 +34,7 @@ jobs:
         run: |
           echo "Zipping Deployment"
           zip deployment.zip bootstrap
-          echo "Completed PACKAGING"`
+          echo "Completed PACKAGING"
       - name: Publish
         uses: actions/upload-artifact@v4
         with:
