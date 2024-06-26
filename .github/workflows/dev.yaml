@@ -34,7 +34,7 @@ jobs:
           echo "REF_NAME: $REF_NAME"
 
           echo "Download Release"
-          gh release download v1.0.0 "deployment.zip"
+          gh release download v1.0.0 --pattern "deployment.zip"
           echo "Download Complete"
 
           echo "Running Deployment"
