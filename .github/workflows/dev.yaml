@@ -35,9 +35,19 @@ jobs:
           AWS_DEFAULT_REGION: ap-southeast-2
         run: |
           echo "REF_NAME: $REF_NAME"
+          # if the ref_name is main we are assuming this was auto triggered from a workflow_run; and we need to gather
+          # the latest tag from github itself
+          # otherwise if the deployment was manually triggered it would be done so from a existing tag and the ref_name
+          # will not be "main"; it would be "vx.x.x"
+          if [[ $REF_NAME == "main" ]]; then
+            latest_tag=$(gh release view --json tagName --jq ".tagName")
+            echo "Latest tag from main: $latest_tag"
+          else
+            latest_tag="$REF_NAME"
+          fi
 
           echo "Download Release"
-          gh release download v1.0.1 --pattern "deployment.zip"
+          gh release download $latest_tag --pattern "deployment.zip"
           echo "Download Complete"
 
           echo "Running Deployment"

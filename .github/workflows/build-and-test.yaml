@@ -48,6 +48,42 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
+      - name: Get Latest Release Version
+        id: get-release-version
+        run: |
+          echo "Getting Latest Release Version"
+          latest_release=$(gh release view --json tagName --jq ".tagName")
+          echo "Latest Release: $latest_release"
+
+          # use the commit to check and see if something like MAJOR or MINOR is written in it
+          # if it is then bump the version up in that column; ie: MAJOR; v1 -> v2.. MINOR; v1.1 -> v1.2
+          # default with no message will be patch bump; ie: v1.1.1 -> v1.1.2
+          echo "Getting Latest Commit Message"
+          latest_commit=$(git log -1 --pretty=%B)
+          echo "Latest Commit Message: $latest_commit" 
+
+          version_values=($(echo $latest_release | sed 's/v//' | tr '.' ' '))
+          new_version=""
+          if [[ $latest_commit == *"MAJOR"* ]]; then
+            # bump major version
+            echo "Bumping Major Version"
+            major=$((${version_values[1]} + 1))
+            new_version="v$major.${version_values[2]}.${version_values[3]}"
+          elif [[ $latest_commit == *"MINOR"* ]]; then
+            # bump minor version
+            echo "Bumping Minor Version"
+            minor=$((${version_values[2]} + 1))
+            new_version="v${version_values[1]}.$minor.${version_values[3]}"
+          else
+            # bump patch version
+            echo "Bumping Patch Version"
+            patch=$((${version_values[3]} + 1))
+            new_version="v${version_values[1]}.${version_values[2]}.$patch"
+          fi
+
+          echo "New Version Number: $new_version"
+          echo "RELEASE_VERSION=$new_version" >> "$GITHUB_OUTPUT"
+
       - name: "Download Build"
         uses: actions/download-artifact@v4
         with:
@@ -56,7 +92,8 @@ jobs:
       - name: Create Release
         env:
           GH_TOKEN: ${{ github.token }}
+          RELEASE_VERSION: ${{ steps.get-release-version.outputs.RELEASE_VERSION }}
         run: |
           echo "Creating Release"
-          gh release create v1.0.1 './deployment/deployment.zip'
+          gh release create $RELEASE_VERSION './deployment/deployment.zip'
 
