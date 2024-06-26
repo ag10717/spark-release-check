@@ -38,5 +38,5 @@ jobs:
           echo "Download Complete"
 
           echo "Running Deployment"
-          aws lambda update-function-code --function-name "helloworld-go" --zip-file "deployment.zip"
+          aws lambda update-function-code --function-name "helloworld-go" --zip-file "fileb://deployment.zip"
           echo "Completed Updating Function Code"
