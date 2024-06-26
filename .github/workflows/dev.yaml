@@ -4,6 +4,7 @@ run-name: "DEV Deploy - Version: ${{ github.ref_name }}"
 # Can run from other workflows or manually triggered
 on:
   release:
+    types: [released]
   workflow_dispatch:
 
 permissions:
