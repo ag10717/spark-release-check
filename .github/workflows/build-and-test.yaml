@@ -50,6 +50,8 @@ jobs:
           fetch-depth: 0
       - name: Get Latest Release Version
         id: get-release-version
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
           echo "Getting Latest Release Version"
           latest_release=$(gh release view --json tagName --jq ".tagName")
