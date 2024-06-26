@@ -69,18 +69,18 @@ jobs:
           if [[ $latest_commit == *"MAJOR"* ]]; then
             # bump major version
             echo "Bumping Major Version"
-            major=$((${version_values[1]} + 1))
-            new_version="v$major.${version_values[2]}.${version_values[3]}"
+            major=$((${version_values[0]} + 1))
+            new_version="v$major.${version_values[1]}.${version_values[2]}"
           elif [[ $latest_commit == *"MINOR"* ]]; then
             # bump minor version
             echo "Bumping Minor Version"
-            minor=$((${version_values[2]} + 1))
-            new_version="v${version_values[1]}.$minor.${version_values[3]}"
+            minor=$((${version_values[1]} + 1))
+            new_version="v${version_values[0]}.$minor.${version_values[3]}"
           else
             # bump patch version
             echo "Bumping Patch Version"
-            patch=$((${version_values[3]} + 1))
-            new_version="v${version_values[1]}.${version_values[2]}.$patch"
+            patch=$((${version_values[2]} + 1))
+            new_version="v${version_values[0]}.${version_values[1]}.$patch"
           fi
 
           echo "New Version Number: $new_version"
