@@ -1,7 +1,25 @@
 package main
 
-import "fmt"
+import (
+	"context"
+	"fmt"
+
+	"github.com/aws/aws-lambda-go/lambda"
+)
+
+type MyEvent struct {
+	Name string `json:"name"`
+}
+
+func HandleRequest(ctx context.Context, event *MyEvent) (*string, error) {
+	if event == nil {
+		return nil, fmt.Errorf("recieved nil event")
+	}
+
+	message := fmt.Sprintf("Hello, %s", event.Name)
+	return &message, nil
+}
 
 func main() {
-	fmt.Println("Hello, World!")
+	lambda.Start(HandleRequest)
 }
