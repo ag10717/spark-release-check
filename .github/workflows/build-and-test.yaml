@@ -88,8 +88,8 @@ jobs:
             fi
           else
             echo "Checking Feature Version"
-            feature_version=$(echo "${latest_release: -4}")
-            if [[ $feature_version == *"-"* ]]; then
+            feature_version=$(echo "${latest_release##*-}")
+            if [[ $feature_version != *"v"* ]]; then
               echo "Bumping Feature Version"
               # already has a feature version and it can be bumped
               trimmed=$(echo "${feature_version:1}")
@@ -98,7 +98,7 @@ jobs:
               no_feature_string=($(echo $latest_release | sed 's/-[0-9]*//'))
               new_version="$no_feature_string-$new_feature_version"
             else
-              # if it doesn't contain the "-" then it doesn't have a feature version on the end
+              # if it contains the "v" then it doesn't have a feature version on the end
               # doesn't have a feature version yet
               echo "Adding Feature Version & Bumping Patch"
               patch=$((patch + 1))
