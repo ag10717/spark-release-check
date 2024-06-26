@@ -58,5 +58,5 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           echo "Creating Release"
-          gh release create v1.0.0 './deployment/deployment.zip'
+          gh release create v1.0.1 './deployment/deployment.zip'
 
