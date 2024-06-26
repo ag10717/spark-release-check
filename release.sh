@@ -12,8 +12,9 @@ new_version_number=$(version_number + 1)
 # 6. push
 #
 make build
-git checkout -b release
 find . -not -name "lib" -delete
+
+git checkout -b release
 git add "lib"
 git commit -m "release version"
 git tag -a "$new_version_number" -m "$new_version_number"
