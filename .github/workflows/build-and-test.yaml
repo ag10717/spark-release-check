@@ -4,8 +4,9 @@ run-name: Build & Test
 # Can run on pushes and manually triggered
 on:
   push:
-    tags-ignore:
-      - v**
+    branches:
+      - 'feature'
+      - 'main'
   workflow_dispatch:
 
 permissions:
