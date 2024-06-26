@@ -27,30 +27,22 @@ jobs:
         run: |
           echo $EVENT_CONTEXT
 
-      # - name: Deployment
-      #   env:
-      #     REF_NAME: ${{ github.ref_name }}
-      #     GH_TOKEN: ${{ github.token }}
-      #     AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY }}
-      #     AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-      #     AWS_DEFAULT_REGION: ap-southeast-2
-      #   run: |
-      #     echo "REF_NAME: $REF_NAME"
-      #     # if the ref_name is main we are assuming this was auto triggered from a workflow_run; and we need to gather
-      #     # the latest tag from github itself
-      #     # otherwise if the deployment was manually triggered it would be done so from a existing tag and the ref_name
-      #     # will not be "main"; it would be "vx.x.x"
-      #     if [[ $REF_NAME == "main" ]]; then
-      #       latest_tag=$(gh release view --json tagName --jq ".tagName")
-      #       echo "Latest tag from main: $latest_tag"
-      #     else
-      #       latest_tag="$REF_NAME"
-      #     fi
-      #
-      #     echo "Download Release"
-      #     gh release download $latest_tag --pattern "deployment.zip"
-      #     echo "Download Complete"
-      #
-      #     echo "Running Deployment"
-      #     aws lambda update-function-code --function-name "helloworld-go" --zip-file "fileb://deployment.zip"
-      #     echo "Completed Updating Function Code"
+      - name: Deployment
+        env:
+          REF_NAME: ${{ github.ref_name }}
+          TAG_NAME: ${{ github.event.release.tag_name }}
+          GH_TOKEN: ${{ secrets.PA_TOKEN }}
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_DEFAULT_REGION: ap-southeast-2
+        run: |
+          echo "REF_NAME: $REF_NAME"
+          echo "TAG_NAME: $TAG_NAME"
+
+          echo "Download Release"
+          gh release download $TAG_NAME --pattern "deployment.zip"
+          echo "Download Complete"
+
+          echo "Running Deployment"
+          aws lambda update-function-code --function-name "helloworld-go" --zip-file "fileb://deployment.zip"
+          echo "Completed Updating Function Code"
