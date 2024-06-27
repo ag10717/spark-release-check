@@ -93,8 +93,10 @@ jobs:
               new_version="v${version_values[0]}.${version_values[1]}.$patch"
               # we should check to see if the input even is a workflow dispatch on main
               # in that case we should just remove the current latest release/tag and let it be recreated
-              
-              echo "triggering even $EVENT_NAME"
+              if [[ $EVENT_NAME == "workflow_dispatch" ]]; then
+                #remove the current release
+                gh release delete $latest_release --cleanup-tag
+              fi
             fi
           else
             echo "Checking Feature Version"
