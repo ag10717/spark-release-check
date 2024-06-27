@@ -34,7 +34,7 @@ jobs:
           AWS_DEFAULT_REGION: ap-southeast-2
         run: |
           echo "Download Release: $REF_NAME"
-          gh release download $TAG_NAME --pattern "deployment.zip"
+          gh release download $REF_NAME --pattern "deployment.zip"
           echo "Download Complete"
 
           echo "Running Deployment"
