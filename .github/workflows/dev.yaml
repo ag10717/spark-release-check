@@ -1,5 +1,10 @@
 name: Deploy to DEV
-run-name: "DEV Deploy - Version: ${{ github.ref_name }}"
+run-name: >-
+  if [[ ${{ github.event_name == "release" }} ]]; then
+    "DEV Deploy - Version: ${{ github.ref_name }}"
+  else
+    "DEV Deploy - Version: ${{ inputs.tag_name }}"
+  fi
 
 # Can run from other workflows or manually triggered
 # run from release when build is completed, but if you want to run manually then you need to pass the input of tag_name
