@@ -28,13 +28,21 @@ Given that statement, we should look to find a solution that does that for us; i
 
 Releases are put together based on a tag, so with the tag existing and defining the code at a certain point in time by `vx.x.x`, we can add our build asset to that release (built from that point in time). Now that we have that given release version, `v1.1.4`, if we were to run some kind of deployment targeting the assests in that release, we'll always deploy `v1.1.4` to our environment.
 
+We could trigger a manual deployment targeting whichever release up to the point in which the release would no longer exist. This is a repeatable way to deploy new code, roll back code, or manually use the build to validate other function platforms.
+
 ## Keeping Things Separate
 
 Now when it comes to redploying code our current pattern defines all the jobs for environment deployment and build together. Meaning that in Github Actions if you triggered the `workflow_dispatch` (manual run) you would always be building the code again, even when it's unchanged, just to fire a new environmental deployment.
 
 By separating out the Build (and Test) stage into it's own workflow, we're now given the ability to build our code on every push, create a release for that "unstable", or "stable" (when it's merged in to our main/default branch) version, and ultimately call that feature "completed".
 
-With this approach we now also have the ability to automatically run an environment when a release is `released`. This let's us keep the ability to automatically push code to the Development environment. We achieve this by using Github Actions built-in events, and in this particular case the event is called `release`.
+Release Management now has the opportunity to say which application version should be released at which time to whichever environment and development can continue unimpeded since previous builds would be locked to that release.
+
+With this approach we now also have the ability to automatically run an environment when a release is `released`.
+
+> NOTE: `released` is a keyword provided by the Github event to mark the state of the release, particular event types can trigger different workflows.
+
+This let's us keep the ability to automatically push code to the Development environment and we achieve this by using Github Actions built-in events, and in this particular case the event is called `release`.
 
 So, within our workflow structure, in our DEV workflow we define the case like this:
 
@@ -47,9 +55,11 @@ on:
         types: [released]
 ```
 
-This now tells this workflow that whenever a new released is `released` (which is when the build and publish workflow is complete) that we want to run. This also gives us the added benefit of using the `run-name` option in our workflow. Since `run-name` can only use values from either the `github` context or `inputs`, emulating the rename that was done in Azure DevOps was impossible to do when the run was in progress.
+This now tells this workflow that whenever a new release is `released` (which is when the build and publish workflow is complete) that we want to run. This also gives us the added benefit of using the `run-name` option in our workflow.
 
-Since the `github.ref_name` on a `release` event is the tag that was created/released, when we view the run in the Action tab in Github we can see a value like `DEV Deploy - Version: v1.1.4`
+Since `run-name` can only use values from either the `github` context or `inputs`, emulating the rename that was done in Azure DevOps was impossible to do when the run was in progress. Now with this trigger the `github.ref_name` on a `release` event is the tag that was created/released, when we view the run in the Action tab in Github we can see a value like `DEV Deploy - Version: v1.1.4`
+
+![github-release-run-name](./images/github-release-run-name.png)
 
 ## Build & Release
 
