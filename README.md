@@ -48,16 +48,26 @@ So, within our workflow structure, in our DEV workflow we define the case like t
 
 ```yaml
 name: Deploy to DEV
-run-name: "DEV Deploy - Version: ${{ github.ref_name }}"
+run-name: >-
+  ${{ github.event_name == 'release'
+    && format('DEV Deploy - Version: {0}', github.ref_name)
+    || format('DEV Deploy - Version: {0}', inputs.tag_name) }}
 
+# Can run from other workflows or manually triggered
+# run from release when build is completed, but if you want to run manually then you need to pass the input of tag_name
+# if run on release then this file needs to be working at the point in time
 on:
-    release:
-        types: [released]
+  release:
+    types: [released]
+  workflow_dispatch:
+    inputs:
+      tag_name:
+        type: string
 ```
 
 This now tells this workflow that whenever a new release is `released` (which is when the build and publish workflow is complete) that we want to run. This also gives us the added benefit of using the `run-name` option in our workflow.
 
-Since `run-name` can only use values from either the `github` context or `inputs`, emulating the rename that was done in Azure DevOps was impossible to do when the run was in progress. Now with this trigger the `github.ref_name` on a `release` event is the tag that was created/released, when we view the run in the Action tab in Github we can see a value like `DEV Deploy - Version: v1.1.4`
+Since `run-name` can only use values from either the `github` context or `inputs`, emulating the rename that was done in Azure DevOps was impossible to do when the run was in progress. Now with this trigger the `github.ref_name` or `inputs.tag_name` on a either event can be used to name the run and show the version being deployed. When we view the run in the Action tab in Github we can see a value like `DEV Deploy - Version: v1.1.4`
 
 ![github-release-run-name](./images/github-release-run-name.png)
 
@@ -267,3 +277,6 @@ on:
         type: string
 ```
 
+These separations help us automaticcally test out the infrastructure in a development environment to validate it's usage. But means that a developer just has to produce the code and ensure that the build passes.
+
+When the business is ready to move to higher environments they should be triggered for whatever version they need.
