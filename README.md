@@ -24,9 +24,9 @@ If we look at this image below, is there any definitive way to say a run is depl
 
 ![boat-github-workflows](./images/boat-github-workflows.png)
 
-Given that statement, we should look to find a solution that does that for us; in comes "Releases". Releases aren't specific Github Actions, they are a function of Github and code management itself (for example the Gitlab platform also has releases)
+Given that statement, we should look to find a solution that does that for us; in comes "Releases". Releases aren't specific to Github Actions, they are a function of Github and other code management platforms, for example the Gitlab platform also has releases.
 
-Releases are put together based on a tag, so with the tag existing and defining the code at a certain point in time by `vx.x.x`, we can add our build asset to that release (built from that point in time). Now we that we have that given release version, `v1.1.4`, if we were to run some kind of deployment targeting the assests in that release, we'll always deploy `v1.1.4` to our environment.
+Releases are put together based on a tag, so with the tag existing and defining the code at a certain point in time by `vx.x.x`, we can add our build asset to that release (built from that point in time). Now that we have that given release version, `v1.1.4`, if we were to run some kind of deployment targeting the assests in that release, we'll always deploy `v1.1.4` to our environment.
 
 ## Keeping Things Separate
 
