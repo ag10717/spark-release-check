@@ -174,36 +174,96 @@ If we take a look at our releases in Github, we'll see the version we created an
 
 Now we're ready to take our release to the masses. We've already covered how a Development environment would use the `release` github event to fire off automatically, but what about if we want to deploy a previous version?
 
-A user could navigate to the Actions tab in Github, open the workflow for "Deploy to DEV" and use the `workflow_dispatch` to trigger a new run. This is ultimately where our build efforts start to pay off, instead of using a branch to trigger the deployment we can select a tag version.
+A user could navigate to the Actions tab in Github, open the workflow for "Deploy to DEV" and use the `workflow_dispatch` to trigger a new run. This is ultimately where our build efforts start to pay off, we can then trigger from the main (or other branch) and pass an input giving the tag version that we want to deploy.
 
-![github-actions-dev-deploy](./images/github-actions-dev-deploy.png)
+So at any given point in time, as long as the release/tag exists, we can deploy that version again. Let's take a look a the deployment actions; for DEV we make exceptions for the `release` trigger type:
 
-So at any given point in time, as long as the release exists, we can deploy that version again. Let's take a look a the deployment actions.
+### Actions
 
 ```yaml
       - name: Deployment
         env:
+          TAG_NAME: ${{ inputs.tag_name }}
           REF_NAME: ${{ github.ref_name }}
-          TAG_NAME: ${{ github.event.release.tag_name }}
+          EVENT_NAME: ${{ github.event_name }}
           GH_TOKEN: ${{ secrets.PA_TOKEN }}
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           AWS_DEFAULT_REGION: ap-southeast-2
         run: |
-          echo "REF_NAME: $REF_NAME"
-          echo "TAG_NAME: $TAG_NAME"
 
-          echo "Download Release"
+          if [[ $EVENT_NAME == "release" ]]; then
+            echo "Download Release: $REF_NAME"
+            gh release download $REF_NAME --pattern "deployment.zip"
+          else
+            echo "Download Release: $TAG_NAME"
+            gh release download $TAG_NAME --pattern "deployment.zip"
+          fi
+          echo "Download Complete"
+
+          echo "Running Deployment"
+          aws lambda update-function-code --function-name "helloworld-go-dev" --zip-file "fileb://deployment.zip"
+          echo "Completed Updating Function Code"
+```
+
+We do this because our Development deployment has the auto trigger where a release passes in the formation as the `REF_NAME`; we then also have the ability to take the standard approach that all other environments will have where we can pass in the input of `tag_name`.
+
+The comparison to other environments are below:
+
+```yaml
+      - name: Deployment
+        env:
+          TAG_NAME: ${{ inputs.tag_name }}
+          GH_TOKEN: ${{ secrets.PA_TOKEN }}
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_DEFAULT_REGION: ap-southeast-2
+        run: |
+          echo "Download Release: $TAG_NAME"
           gh release download $TAG_NAME --pattern "deployment.zip"
           echo "Download Complete"
 
           echo "Running Deployment"
-          aws lambda update-function-code --function-name "helloworld-go" --zip-file "fileb://deployment.zip"
+          aws lambda update-function-code --function-name "helloworld-go-sit" --zip-file "fileb://deployment.zip"
           echo "Completed Updating Function Code"
 ```
 
-This step is incredibly straight forward for this example but simply we use the same github cli to download only the deployment package asset from the specific version that the workflow is triggered against.
+### Triggers
 
-We would then expect the response from lambda function to return the result from that version of code.
+Now let's check out the trigger differences between Development and other environments:
 
-The deployment of the code would largely remain the same, but expanding the jobs to cover any configuration items that are required first should be fairly simple.
+```yaml
+name: Deploy to DEV
+run-name: >-
+  ${{ github.event_name == 'release'
+    && format('DEV Deploy - Version: {0}', github.ref_name)
+    || format('DEV Deploy - Version: {0}', inputs.tag_name) }}
+
+# Can run from other workflows or manually triggered
+# run from release when build is completed, but if you want to run manually then you need to pass the input of tag_name
+# if run on release then this file needs to be working at the point in time
+on:
+  release:
+    types: [released]
+  workflow_dispatch:
+    inputs:
+      tag_name:
+        type: string
+```
+
+> NOTE: This also has a special `run-name` condition to change the value of the run name to match either the release ref_name or the input. This is based off the event_name being `release` or not.
+
+And any others are:
+
+```yaml
+name: Deploy to SIT
+run-name: "SIT Deploy - Version: ${{ inputs.tag_name }}"
+
+# Can run from other workflows or manually triggered
+on:
+  workflow_dispatch:
+    inputs:
+      tag_name:
+        type: string
+```
+
