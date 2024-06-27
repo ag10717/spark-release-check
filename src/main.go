@@ -12,11 +12,7 @@ type MyEvent struct {
 }
 
 func HandleRequest(ctx context.Context, event *MyEvent) (*string, error) {
-	if event == nil {
-		return nil, fmt.Errorf("recieved nil event")
-	}
-
-	message := fmt.Sprintf("Hello, %s; SCATTER!", event.Name)
+	message := fmt.Sprintf("Hello, World! This Example shows a previous version!")
 	return &message, nil
 }
 
