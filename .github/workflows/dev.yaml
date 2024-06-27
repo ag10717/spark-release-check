@@ -1,6 +1,6 @@
 name: Deploy to DEV
 run-name: >-
-  if [[ ${{ github.event_name == "release" }} ]]; then
+  if [[ ${{ github.event_name }} == "release" ]]; then
     "DEV Deploy - Version: ${{ github.ref_name }}"
   else
     "DEV Deploy - Version: ${{ inputs.tag_name }}"
