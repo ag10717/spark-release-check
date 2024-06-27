@@ -176,7 +176,7 @@ Now we're ready to take our release to the masses. We've already covered how a D
 
 A user could navigate to the Actions tab in Github, open the workflow for "Deploy to DEV" and use the `workflow_dispatch` to trigger a new run. This is ultimately where our build efforts start to pay off, instead of using a branch to trigger the deployment we can select a tag version.
 
-![github-actions-dev-deploy](./image/github-actions-dev-deploy.png)
+![github-actions-dev-deploy](./images/github-actions-dev-deploy.png)
 
 So at any given point in time, as long as the release exists, we can deploy that version again. Let's take a look a the deployment actions.
 
