@@ -8,21 +8,25 @@ Currently when using either Azure DevOps or Github Actions there is no repeatabl
 
 In Azure DevOps pipelines can be "retained", but in Github Actions the workflow run is only kept for a number of days defined by the Github Adminitstrator.
 
-The main principal by this type of pattern is to:
+The main principal behind a new pattern is to:
 
 * Make it easier to identify currently deployed versions of code
-* Make it easier to redeploy by release version
+* Make it easier to redeploy by application version
 * Allow deployment of apps outside of CI/CD by obtaining the built package
 
-> NOTE: Currently I have only demonstrated this pattern in Github Actions; but given CI/CDs nature this should be repeatable in any platform
+> NOTE: Currently I have only demonstrated this pattern in Github Actions; but given the way CI/CDs are built, this should be repeatable in any platform.
 
 ## How
 
 If we limit our looking glass to Github Actions, it can be extremely difficult to identify which workflow run deployed the latest to a specific environment. This is because the workflow run just performs the action; it has no particular want or need to track your version deployment for you.
 
+If we look at this image below, is there any definitive way to say a run is deployed to Production, or any other environment? I would say "no".
+
+![boat-github-workflows](./images/boat-github-workflows.png)
+
 Given that statement, we should look to find a solution that does that for us; in comes "Releases". Releases aren't specific Github Actions, they are a function of Github and code management itself (for example the Gitlab platform also has releases)
 
-Releases are put together based on a tag, so with the tag existing and defining the code at a certain point in time by `vx.x.x`, we can add our build asset to that release (built from that point in time) to that release. Now we that that for given release version `v1.1.4` if we were to run some kind of deployment targeting the assests in that release, we'll always deploy `v1.1.4` to our environment.
+Releases are put together based on a tag, so with the tag existing and defining the code at a certain point in time by `vx.x.x`, we can add our build asset to that release (built from that point in time). Now we that we have that given release version, `v1.1.4`, if we were to run some kind of deployment targeting the assests in that release, we'll always deploy `v1.1.4` to our environment.
 
 ## Keeping Things Separate
 

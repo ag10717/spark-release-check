@@ -7,6 +7,8 @@ on:
     branches:
       - 'feature'
       - 'main'
+    paths-ignore:
+      - "README.md"
   workflow_dispatch:
 
 permissions:
