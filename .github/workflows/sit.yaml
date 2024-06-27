@@ -1,8 +1,8 @@
 name: Deploy to SIT
+run-name: "SIT Deploy - Version: ${{ github.ref_name }}"
 
 # Can run from other workflows or manually triggered
 on:
-  workflow_call:
   workflow_dispatch:
 
 permissions:
@@ -11,9 +11,32 @@ permissions:
   checks: write # Required for test-reporter action
 
 jobs:
-  echo-hello:
+  deploy:
     runs-on: ubuntu-latest
     steps:
-      - run: |
-          echo "Hello, SIT"
+      - name: Checkout Codebase
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
+      - name: Check Event
+        env:
+          EVENT_CONTEXT: ${{ toJSON(github.event) }}
+        run: |
+          echo $EVENT_CONTEXT
+
+      - name: Deployment
+        env:
+          REF_NAME: ${{ github.ref_name }}
+          GH_TOKEN: ${{ secrets.PA_TOKEN }}
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_DEFAULT_REGION: ap-southeast-2
+        run: |
+          echo "Download Release: $REF_NAME"
+          gh release download $TAG_NAME --pattern "deployment.zip"
+          echo "Download Complete"
+
+          echo "Running Deployment"
+          aws lambda update-function-code --function-name "helloworld-go-sit" --zip-file "fileb://deployment.zip"
+          echo "Completed Updating Function Code"
