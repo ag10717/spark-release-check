@@ -2,15 +2,18 @@ name: Deploy to DEV
 run-name: "DEV Deploy - Version: ${{ github.ref_name }}"
 
 # Can run from other workflows or manually triggered
+# run from release when build is completed, but if you want to run manually then you need to pass the input of tag_name
+# if run on release then this file needs to be working at the point in time
 on:
   release:
     types: [released]
   workflow_dispatch:
+    inputs:
+      tag_name:
+        type: string
 
 permissions:
   contents: write
-  id-token: write # Required for the azure login action
-  checks: write # Required for test-reporter action
 
 jobs:
   deploy:
@@ -29,14 +32,22 @@ jobs:
 
       - name: Deployment
         env:
+          TAG_NAME: ${{ inputs.tag_name }}
           REF_NAME: ${{ github.ref_name }}
+          EVENT_NAME: ${{ github.event_name }}
           GH_TOKEN: ${{ secrets.PA_TOKEN }}
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           AWS_DEFAULT_REGION: ap-southeast-2
         run: |
-          echo "Download Release: $REF_NAME"
-          gh release download $REF_NAME --pattern "deployment.zip"
+
+          if [[ $EVENT_NAME == "release" ]]; then
+            echo "Download Release: $REF_NAME"
+            gh release download $REF_NAME --pattern "deployment.zip"
+          else
+            echo "Download Release: $TAG_NAME"
+            gh release download $TAG_NAME --pattern "deployment.zip"
+          fi
           echo "Download Complete"
 
           echo "Running Deployment"

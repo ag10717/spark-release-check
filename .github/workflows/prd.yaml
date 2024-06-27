@@ -1,14 +1,15 @@
 name: Deploy to PRD
-run-name: "PRD Deploy - Version: ${{ github.ref_name }}"
+run-name: "PRD Deploy - Version: ${{ inputs.tag_name }}"
 
 # Can run from other workflows or manually triggered
 on:
   workflow_dispatch:
+    inputs:
+      tag_name:
+        type: string
 
 permissions:
   contents: write
-  id-token: write # Required for the azure login action
-  checks: write # Required for test-reporter action
 
 jobs:
   deploy:
@@ -27,14 +28,14 @@ jobs:
 
       - name: Deployment
         env:
-          REF_NAME: ${{ github.ref_name }}
+          TAG_NAME: ${{ inputs.tag_name }}
           GH_TOKEN: ${{ secrets.PA_TOKEN }}
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           AWS_DEFAULT_REGION: ap-southeast-2
         run: |
-          echo "Download Release: $REF_NAME"
-          gh release download $REF_NAME --pattern "deployment.zip"
+          echo "Download Release: $TAG_NAME"
+          gh release download $TAG_NAME --pattern "deployment.zip"
           echo "Download Complete"
 
           echo "Running Deployment"
