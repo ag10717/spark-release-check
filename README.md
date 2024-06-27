@@ -65,7 +65,7 @@ Since `run-name` can only use values from either the `github` context or `inputs
 
 Now that Build, Test, and Release are separated from the deployments we can choose what versions of the packaged code we want to deploy to where.
 
-Lets take a look at this examples Build and Release processes.
+Lets take a look at these example Build and Release processes.
 
 > NOTE: This uses an arbitrary method to increment the tag number for this example, but any versioning scheme would ultimately work.
 
@@ -88,14 +88,20 @@ on:
     branches:
       - 'feature'
       - 'main'
+    paths:
+      - "src/**"
   workflow_dispatch:
 ```
 
 We are required to specify the branches that we want to trigger these events on because of the way the tagging mechanism would work. When a tag is created that also constitutes a push, which would create an endless loop of this workflow.
 
+We can also combine this with the `paths` property to say we only want to trigger a build and release when the source code changes.
+
 > NOTE: I would have liked to use the built-in `tags-ignore:` property for `push` but when that is added alone it prevents any push from triggering the workflow
 
-Now that our workflow is firing lets look at the actions we perform. Just keep in mind the items we are building and deploying in this workflow are examples and a simple approach to demonstrate how this work. Currently it builds a GO Handler for AWS Lambda and deploys to such.
+Now that our workflow is firing lets look at the actions we perform.
+
+> NOTE: Just keep in mind the items we are building and deploying in this workflow are examples and a simple approach to demonstrate how this work. Currently it builds a GO Handler for AWS Lambda and deploys to such.
 
 > NOTE: GO was choosen as it has a build step that we can complete that is built-in to GO.
 
@@ -118,9 +124,9 @@ Now that our workflow is firing lets look at the actions we perform. Just keep i
           echo "Completed PACKAGING"
 ```
 
-Our "Build" job simply runs `make build-aws` which in the Makefile just runs `go build -o bootstrap main.go`. We then package this up into a zip that can be used to upload to AWS Lambda.
+Our "Build" job simply runs `make build-aws` which in the Makefile just runs `go build -o bootstrap main.go`.
 
-We then publish that artifact and our Build job is considered complete.
+We then package this up into a zip that can be used to upload to AWS Lambda and then publish that artifact. To which we can say our Build job is considered complete.
 
 ```yaml
       - name: Publish
@@ -164,4 +170,40 @@ That's it we've completed our build and created a release that can be deployed l
 If we take a look at our releases in Github, we'll see the version we created and the asset `deployment.zip` attached to it:
 ![releases](./images/github-releases.png)
 
+## Deployment
 
+Now we're ready to take our release to the masses. We've already covered how a Development environment would use the `release` github event to fire off automatically, but what about if we want to deploy a previous version?
+
+A user could navigate to the Actions tab in Github, open the workflow for "Deploy to DEV" and use the `workflow_dispatch` to trigger a new run. This is ultimately where our build efforts start to pay off, instead of using a branch to trigger the deployment we can select a tag version.
+
+![github-actions-dev-deploy](./image/github-actions-dev-deploy.png)
+
+So at any given point in time, as long as the release exists, we can deploy that version again. Let's take a look a the deployment actions.
+
+```yaml
+      - name: Deployment
+        env:
+          REF_NAME: ${{ github.ref_name }}
+          TAG_NAME: ${{ github.event.release.tag_name }}
+          GH_TOKEN: ${{ secrets.PA_TOKEN }}
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_DEFAULT_REGION: ap-southeast-2
+        run: |
+          echo "REF_NAME: $REF_NAME"
+          echo "TAG_NAME: $TAG_NAME"
+
+          echo "Download Release"
+          gh release download $TAG_NAME --pattern "deployment.zip"
+          echo "Download Complete"
+
+          echo "Running Deployment"
+          aws lambda update-function-code --function-name "helloworld-go" --zip-file "fileb://deployment.zip"
+          echo "Completed Updating Function Code"
+```
+
+This step is incredibly straight forward for this example but simply we use the same github cli to download only the deployment package asset from the specific version that the workflow is triggered against.
+
+We would then expect the response from lambda function to return the result from that version of code.
+
+The deployment of the code would largely remain the same, but expanding the jobs to cover any configuration items that are required first should be fairly simple.
