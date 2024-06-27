@@ -95,7 +95,9 @@ jobs:
               # in that case we should just remove the current latest release/tag and let it be recreated
               if [[ $EVENT_NAME == "workflow_dispatch" ]]; then
                 #remove the current release
+                echo "Removing Latest Release"
                 gh release delete $latest_release --cleanup-tag
+                echo "$latest_release - Ready for Recreation"
               fi
             fi
           else
