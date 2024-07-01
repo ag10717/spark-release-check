@@ -17,46 +17,14 @@ permissions:
 jobs:
   build-and-package:
     runs-on: ubuntu-latest
+    outputs:
+      release_version: ${{ steps.get-release-version.outputs.RELEASE_VERSION }}
     steps:
       - name: Checkout Codebase
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      - name: Build
-        run: |
-          echo "Moving to SRC Directory"
-          pushd src
-
-          echo "Running Vite Build"
-          npm i
-          npm run build
-          echo "Moving back to Repo Root"
-
-          popd
-          echo "Completed BUILD"
-      - name: Packaging
-        run: |
-          pushd src
-
-          echo "Zipping Deployment"
-          zip -r dist.zip dist/*
-          echo "Completed PACKAGING"
-
-          popd
-      - name: Publish
-        uses: actions/upload-artifact@v4
-        with:
-          name: dist
-          path: ./src/dist.zip
-  release:
-    needs: build-and-package
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout Codebase
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-      - name: Get Release Version
+      - name: Determining Release Version
         id: get-release-version
         env:
           GH_TOKEN: ${{ secrets.PA_TOKEN }}
@@ -124,6 +92,47 @@ jobs:
 
           echo "New Version Number: $new_version"
           echo "RELEASE_VERSION=$new_version" >> "$GITHUB_OUTPUT"
+      - name: Build
+        env:
+          RELEASE_VERSION: ${{ steps.get-release-version.outputs.RELEASE_VERSION }}
+        run: |
+          echo "Moving to SRC Directory"
+          pushd src
+
+          echo "Running Vite Build"
+
+          echo "Injecting Version"
+          echo '{ "version": $RELEASE_VERSION }' >> src/assets/version.json
+          echo "Finished Injecting Version"
+
+          npm i
+          npm run build
+          echo "Moving back to Repo Root"
+
+          popd
+          echo "Completed BUILD"
+      - name: Packaging
+        run: |
+          pushd src
+
+          echo "Zipping Deployment"
+          zip -r dist.zip dist/*
+          echo "Completed PACKAGING"
+
+          popd
+      - name: Publish
+        uses: actions/upload-artifact@v4
+        with:
+          name: dist
+          path: ./src/dist.zip
+  release:
+    needs: build-and-package
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Codebase
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: "Download Build"
         uses: actions/download-artifact@v4
@@ -133,7 +142,7 @@ jobs:
       - name: Create Release
         env:
           GH_TOKEN: ${{ secrets.PA_TOKEN }}
-          RELEASE_VERSION: ${{ steps.get-release-version.outputs.RELEASE_VERSION }}
+          RELEASE_VERSION: ${{ needs.build-and-package.outputs.release_version }}
           REF_NAME: ${{ github.ref_name }}
         run: |
           echo "Creating Release"

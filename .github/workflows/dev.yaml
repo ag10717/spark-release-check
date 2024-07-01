@@ -55,7 +55,7 @@ jobs:
 
           echo "Running Deployment"
           unzip dist.zip
-          
+
           pushd dist
           aws s3 sync . s3://spark-release-check-static
           popd
