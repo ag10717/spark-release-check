@@ -37,7 +37,7 @@ jobs:
       - name: Packaging
         run: |
           echo "Zipping Deployment"
-          zip dist.zip assets/* index.html vite.svg
+          zip dist.zip dist/assets dist/index.html dist/vite.svg
           echo "Completed PACKAGING"
       - name: Publish
         uses: actions/upload-artifact@v4
