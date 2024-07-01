@@ -1,5 +1,5 @@
-name: Build & Test
-run-name: Build & Test
+name: Static Site Build
+run-name: Static Site Build
 #
 # Can run on pushes and manually triggered
 on:
@@ -13,8 +13,6 @@ on:
 
 permissions:
   contents: write
-  id-token: write # Required for the azure login action
-  checks: write # Required for test-reporter action
 
 jobs:
   build-and-package:
@@ -29,8 +27,9 @@ jobs:
           echo "Moving to SRC Directory"
 
           pushd src
-          echo "Running GO Build"
-          make build-aws
+          echo "Running Vite Build"
+          npm i
+          npm run build
           echo "Moving back to Repo Root"
           popd
 
@@ -38,13 +37,13 @@ jobs:
       - name: Packaging
         run: |
           echo "Zipping Deployment"
-          zip deployment.zip bootstrap
+          zip dist.zip assets/* index.html vite.svg
           echo "Completed PACKAGING"
       - name: Publish
         uses: actions/upload-artifact@v4
         with:
-          name: deployment
-          path: ./deployment.zip
+          name: dist
+          path: ./dist.zip
   release:
     needs: build-and-package
     runs-on: ubuntu-latest
@@ -125,7 +124,7 @@ jobs:
       - name: "Download Build"
         uses: actions/download-artifact@v4
         with:
-          name: deployment
+          name: dist
           path: ./deployment
       - name: Create Release
         env:
@@ -134,5 +133,5 @@ jobs:
           REF_NAME: ${{ github.ref_name }}
         run: |
           echo "Creating Release"
-          gh release create $RELEASE_VERSION --target $REF_NAME --title $RELEASE_VERSION './deployment/deployment.zip'
+          gh release create $RELEASE_VERSION --target $REF_NAME --title $RELEASE_VERSION './deployment/dist.zip'
 

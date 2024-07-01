@@ -46,13 +46,14 @@ jobs:
 
           if [[ $EVENT_NAME == "release" ]]; then
             echo "Download Release: $REF_NAME"
-            gh release download $REF_NAME --pattern "deployment.zip"
+            gh release download $REF_NAME --pattern "dist.zip"
           else
             echo "Download Release: $TAG_NAME"
-            gh release download $TAG_NAME --pattern "deployment.zip"
+            gh release download $TAG_NAME --pattern "dist.zip"
           fi
           echo "Download Complete"
 
           echo "Running Deployment"
-          aws lambda update-function-code --function-name "helloworld-go-dev" --zip-file "fileb://deployment.zip"
-          echo "Completed Updating Function Code"
+          unzip dist.zip
+          aws s3 sync . s3://spark-release-check-static
+          echo "Completed Updating Static Site"
