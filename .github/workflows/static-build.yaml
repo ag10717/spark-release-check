@@ -25,21 +25,21 @@ jobs:
       - name: Build
         run: |
           echo "Moving to SRC Directory"
-
           pushd src
+
           echo "Running Vite Build"
           npm i
           npm run build
           echo "Moving back to Repo Root"
-          popd
 
+          popd
           echo "Completed BUILD"
       - name: Packaging
         run: |
           pushd src
 
           echo "Zipping Deployment"
-          zip dist.zip dist
+          zip -r dist.zip dist/*
           echo "Completed PACKAGING"
 
           popd
