@@ -53,12 +53,12 @@ jobs:
               # bump major version
               echo "Bumping Major Version"
               major=$((${version_values[0]} + 1))
-              new_version="v$major.${version_values[1]}.$patch"
+              new_version="v$major.0.0"
             elif [[ $latest_commit == *"MINOR"* ]]; then
               # bump minor version
               echo "Bumping Minor Version"
               minor=$((${version_values[1]} + 1))
-              new_version="v${version_values[0]}.$minor.$patch"
+              new_version="v${version_values[0]}.$minor.0"
             else
               echo "Using Patch Version"
               new_version="v${version_values[0]}.${version_values[1]}.$patch"
