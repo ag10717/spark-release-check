@@ -102,7 +102,7 @@ jobs:
           echo "Running Vite Build"
 
           echo "Injecting Version"
-          echo '{ "version": $RELEASE_VERSION }' >> src/assets/version.json
+          echo "{ \"version\": $RELEASE_VERSION }" >> src/assets/version.json
           echo "Finished Injecting Version"
 
           npm i
