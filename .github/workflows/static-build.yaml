@@ -36,11 +36,13 @@ jobs:
           echo "Completed BUILD"
       - name: Packaging
         run: |
-          echo "Check Files"
-          ls -lna
+          pushd src
+
           echo "Zipping Deployment"
           zip dist.zip dist
           echo "Completed PACKAGING"
+
+          popd
       - name: Publish
         uses: actions/upload-artifact@v4
         with:
