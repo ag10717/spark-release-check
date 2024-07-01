@@ -34,6 +34,7 @@ jobs:
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           AWS_DEFAULT_REGION: ap-southeast-2
         run: |
+          if [[ $EVENT_NAME == "release" ]]; then
           echo "Download Release: $TAG_NAME"
           gh release download $TAG_NAME --pattern "deployment.zip"
           echo "Download Complete"
@@ -41,3 +42,19 @@ jobs:
           echo "Running Deployment"
           aws lambda update-function-code --function-name "helloworld-go-prd" --zip-file "fileb://deployment.zip"
           echo "Completed Updating Function Code"
+            echo "Download Release: $REF_NAME"
+            gh release download $REF_NAME --pattern "dist.zip"
+          else
+            echo "Download Release: $TAG_NAME"
+            gh release download $TAG_NAME --pattern "dist.zip"
+          fi
+          echo "Download Complete"
+
+          echo "Running Deployment"
+          unzip dist.zip
+
+          pushd dist
+          aws s3 cp --recursive . s3://spark-release-check-static-prd
+          popd
+
+          echo "Completed Updating Static Site"
