@@ -38,3 +38,4 @@ Change to force trigger
 - Change 4
 - Change 5 - Noticable between Versions
 - Change 6
+- Change 7
