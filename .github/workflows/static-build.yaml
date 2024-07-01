@@ -47,7 +47,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: dist
-          path: ./dist.zip
+          path: ./src/dist.zip
   release:
     needs: build-and-package
     runs-on: ubuntu-latest
