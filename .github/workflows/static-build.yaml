@@ -36,8 +36,10 @@ jobs:
           echo "Completed BUILD"
       - name: Packaging
         run: |
+          echo "Check Files"
+          ls -lna
           echo "Zipping Deployment"
-          zip dist.zip dist/assets dist/index.html dist/vite.svg
+          zip dist.zip dist
           echo "Completed PACKAGING"
       - name: Publish
         uses: actions/upload-artifact@v4
